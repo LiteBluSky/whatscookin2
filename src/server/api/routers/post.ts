@@ -1,5 +1,5 @@
 import { z } from "zod";
-
+import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 
 export const postRouter = createTRPCRouter({
@@ -23,7 +23,19 @@ export const postRouter = createTRPCRouter({
     }),
 
   getLatest: publicProcedure.query(async ({ ctx }) => {
+    const userId = ctx.auth?.userId;
+
+    if (!userId) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "You must be logged in to view posts",
+      });
+    }
+
     const post = await ctx.db.post.findFirst({
+      where: {
+        ownerId: userId,
+      },
       orderBy: { createdAt: "desc" },
     });
 
