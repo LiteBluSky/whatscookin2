@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-
 import { api } from "@/trpc/react";
+import { createPostAction } from "@/actions/new-post";
 
 export function LatestPost() {
   const [latestPost] = api.post.getLatest.useSuspenseQuery();
@@ -24,9 +24,9 @@ export function LatestPost() {
         <p>You have no posts yet.</p>
       )}
       <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          createPost.mutate({ name });
+        action={async () => {
+          const result = await createPostAction(name);
+          createPost.mutate(result);
         }}
         className="flex flex-col gap-2"
       >
